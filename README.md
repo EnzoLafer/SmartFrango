@@ -140,8 +140,7 @@ Altera dos dados da rotina especificada no `id`, utilizando as informações env
 |campo|tipo|obrigatório|descrição|
 |-----|----|:-----------:|---------|
 |nome|string|✅|Um nome curto para a rotina.
-|exercicios|string|✅|O nome do ícone de acordo com a biblioteca Material Icons
-
+|exercicios|string|✅|O nome do exercício de acordo com a Biblioteca de Exercícios
 ```js
 {
     "nome": "Peito",
