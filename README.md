@@ -1,6 +1,10 @@
 # SmartFrango
 API do projeto Smart Frango - Gerenciador De Treinos
 
+## Colaboradores
+Enzo Lafer Gallucci - RM551111
+Kaiky Noriyuki Ishibashi - RM98876
+
 ## Tarefas
 
 - [ ]  CRUD de Rotinas De Treino
