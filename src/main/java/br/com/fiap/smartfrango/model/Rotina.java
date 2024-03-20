@@ -1,11 +1,18 @@
 package br.com.fiap.smartfrango.model;
 
-import java.util.Random;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Data;
 
-public record Rotina(Long id, String nome, String exercicios) {
-    public Rotina(Long id, String nome, String exercicios){
-        this.id = Math.abs(new Random().nextLong());
-        this.nome = nome;
-        this.exercicios = exercicios;
-    }
+@Data
+@Entity
+public class Rotina {
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String nome;
+    private String exercicios;
+
 }
+

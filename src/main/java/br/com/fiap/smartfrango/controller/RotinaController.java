@@ -1,74 +1,83 @@
 package br.com.fiap.smartfrango.controller;
-import br.com.fiap.smartfrango.model.Rotina;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import br.com.fiap.smartfrango.model.Rotina;
+import br.com.fiap.smartfrango.repository.RotinaRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("rotina")
+@Slf4j
 public class RotinaController {
 
-    Logger log = LoggerFactory.getLogger(getClass());
-
-    List<Rotina> repository = new ArrayList<>();
+    @Autowired
+    RotinaRepository repository;
 
     @GetMapping
-    public List<Rotina> index(){
-        return repository;
+    public List<Rotina> index() {
+        return repository.findAll();
     }
 
     @PostMapping
-    public ResponseEntity<Rotina> create(@RequestBody Rotina rotina){ //binding
+    @ResponseStatus(CREATED)
+    public Rotina create(@RequestBody Rotina rotina) {
         log.info("Cadastrando rotina {}", rotina);
-        repository.add(rotina);
-        return ResponseEntity.status(HttpStatus.CREATED).body(rotina);
+        return repository.save(rotina);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Rotina> show(@PathVariable Long id){
-        log.info("buscando rotina com id {}", id);
+    public ResponseEntity<Rotina> show(@PathVariable Long id) {
+        log.info("Buscando rotina com id {}", id);
 
-        for(Rotina rotina : repository){
-            if (rotina.id().equals(id))
-                return ResponseEntity.status(HttpStatus.OK).body(rotina);
-        }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
+        return repository
+                .findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
 
-    @PutMapping("{id}")
-    public ResponseEntity<Rotina> update(@PathVariable Long id, @RequestBody Rotina updatedRotina) {
-        for (int i = 0; i < repository.size(); i++) {
-            Rotina rotina = repository.get(i);
-            if (rotina.id().equals(id)) {
-                updatedRotina = new Rotina(id, updatedRotina.nome(), updatedRotina.exercicios());
-                repository.set(i, updatedRotina);
-                return ResponseEntity.ok(updatedRotina);
-            }
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Iterator<Rotina> iterator = repository.iterator();
-        while (iterator.hasNext()) {
-            Rotina rotina = iterator.next();
-            if (rotina.id().equals(id)) {
-                iterator.remove();
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    @ResponseStatus(NO_CONTENT)
+    public void destroy(@PathVariable Long id) {
+        log.info("Apagando rotina {}", id);
+        verificarSeRotinaExiste(id);
+        repository.deleteById(id);
     }
-}
 
+    @PutMapping("{id}")
+    public Rotina update(@PathVariable Long id, @RequestBody Rotina rotina) {
+        log.info("Atualizar rotina {} para {}", id, rotina);
+
+        verificarSeRotinaExiste(id);
+        rotina.setId(id);
+        return repository.save(rotina);
+    }
+
+    private void verificarSeRotinaExiste(Long id) {
+        repository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        NOT_FOUND,
+                        "Não existe rotina com o id informado"));
+    }
+
+}
